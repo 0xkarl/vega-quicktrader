@@ -1,4 +1,4 @@
-import { FC, useState, useRef, useMemo, useEffect } from 'react';
+import { FC, useState, useRef, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 
@@ -59,10 +59,10 @@ const TradeChart: FC = () => {
   const { activeMarketId } = useMarkets();
 
   const ref = useRef<ChartElement>(null!);
-  const [chartType, setChartType] = useState<ChartType>('candle');
+  const [chartType] = useState<ChartType>('candle');
   const [study, setStudy] = useState<Study | null>(null);
-  const [overlay, setOverlay] = useState<Overlay | null>(null);
-  const [interval, setInterval] = useState(Interval.I1H);
+  const [overlay] = useState<Overlay | null>(null);
+  const [interval] = useState(Interval.I1H);
 
   const dataSource = useMemo(
     () => new ApolloDataSource(client, activeMarketId!, '', 5),

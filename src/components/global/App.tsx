@@ -1,8 +1,10 @@
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import Header from 'components/global/Header';
 import ConnectVegaWallet from 'components/global/ConnectVegaWallet';
+
+import Home from 'pages/index';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -21,13 +23,13 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-const App: FC<{ children: ReactNode }> = ({ children }) => {
+const App: FC = () => {
   const classes = useStyles();
 
   return (
     <div className={classes.container}>
       <Header />
-      {children}
+      <Home />
       <ConnectVegaWallet />
     </div>
   );

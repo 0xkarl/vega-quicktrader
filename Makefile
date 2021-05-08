@@ -1,12 +1,8 @@
 run: node_modules
-	@yarn dev -- --port 5757
-
-lint:
-	@yarn $@
+	@yarn start
 
 node_modules:
 	@yarn
 
 .PHONY: \
-	run \
-	lint
+	run

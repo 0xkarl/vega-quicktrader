@@ -1,4 +1,4 @@
-import { FC, useMemo, useEffect } from 'react';
+import { FC, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
@@ -22,8 +22,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-let mounted = false; // https://github.com/vercel/next.js/discussions/17443#discussioncomment-637879
-
 const Header: FC = () => {
   const classes = useStyles();
   const {
@@ -32,16 +30,12 @@ const Header: FC = () => {
     disconnect: disconnectVegaWallet,
   } = useVegaWallet();
 
-  useEffect(() => {
-    mounted = true;
-  }, []);
-
   const shortVegaActiveKey = useMemo(() => {
     if (!vegaActiveKey) return null;
-    return `${vegaActiveKey.slice(0, 4)}....${vegaActiveKey.slice(-4)}`;
+    return `${vegaActiveKey.slice(0, 4)}..${vegaActiveKey.slice(-4)}`;
   }, [vegaActiveKey]);
 
-  return !mounted ? null : (
+  return (
     <AppBar position='fixed' color='inherit' className={classes.container}>
       <Toolbar color='inherit'>
         <Typography variant='h6' className={'flex flex-grow'}>
