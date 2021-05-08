@@ -8,8 +8,9 @@ import theme from 'utils/theme';
 import 'styles.css';
 
 import { WalletProvider } from 'hooks/vega-wallet';
-import Header from 'components/shared/Header';
-import ConnectVegaWallet from 'components/shared/ConnectVegaWallet';
+import { MarketsProvider } from 'hooks/markets';
+
+import AppLayout from 'components/global/App';
 
 const App: FC<AppProps> = ({ Component, pageProps }) => {
   useEffect(() => {
@@ -32,9 +33,11 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
         <CssBaseline />
 
         <WalletProvider>
-          <Header />
-          <Component {...pageProps} />
-          <ConnectVegaWallet />
+          <MarketsProvider>
+            <AppLayout>
+              <Component {...pageProps} />
+            </AppLayout>
+          </MarketsProvider>
         </WalletProvider>
       </MuiThemeProvider>
     </>

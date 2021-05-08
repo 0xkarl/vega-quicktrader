@@ -12,11 +12,8 @@ import {
   VEGA_WALLET_ACTIVEKEY_CACHE_KEY,
 } from 'config';
 import cache from 'utils/cache';
-import * as request from 'utils/request';
-
-interface Key {
-  pub: string;
-}
+import * as api from 'vega/api';
+import { Key } from 'vega/types';
 
 const WalletContext = createContext<{
   token: string;
@@ -148,9 +145,9 @@ export function useWallet() {
 }
 
 async function getToken(wallet: string, passphrase: string): Promise<string> {
-  const { token } = await request.wallet({
+  const { token } = await api.wallet({
     method: 'POST',
-    path: '/auth/token',
+    endpoint: '/auth/token',
     data: {
       wallet,
       passphrase,
@@ -160,9 +157,9 @@ async function getToken(wallet: string, passphrase: string): Promise<string> {
 }
 
 async function getKeys(): Promise<Key[]> {
-  const { keys } = await request.wallet({
+  const { keys } = await api.wallet({
     method: 'GET',
-    path: '/keys',
+    endpoint: '/keys',
     auth: true,
   });
   return keys;
