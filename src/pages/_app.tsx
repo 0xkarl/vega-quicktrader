@@ -5,6 +5,11 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 
 import theme from 'utils/theme';
+import 'styles.css';
+
+import { WalletProvider } from 'hooks/vega-wallet';
+import Header from 'components/shared/Header';
+import ConnectVegaWallet from 'components/shared/ConnectVegaWallet';
 
 const App: FC<AppProps> = ({ Component, pageProps }) => {
   useEffect(() => {
@@ -26,7 +31,11 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
       <MuiThemeProvider {...{ theme }}>
         <CssBaseline />
 
-        <Component {...pageProps} />
+        <WalletProvider>
+          <Header />
+          <Component {...pageProps} />
+          <ConnectVegaWallet />
+        </WalletProvider>
       </MuiThemeProvider>
     </>
   );

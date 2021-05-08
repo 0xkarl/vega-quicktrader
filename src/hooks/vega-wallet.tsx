@@ -1,0 +1,169 @@
+import {
+  FC,
+  useState,
+  useContext,
+  useEffect,
+  createContext,
+  ReactNode,
+} from 'react';
+import {
+  VEGA_WALLET_TOKEN_CACHE_KEY,
+  VEGA_WALLET_HOST_CACHE_KEY,
+  VEGA_WALLET_ACTIVEKEY_CACHE_KEY,
+} from 'config';
+import cache from 'utils/cache';
+import * as request from 'utils/request';
+
+interface Key {
+  pub: string;
+}
+
+const WalletContext = createContext<{
+  token: string;
+  connect: (creds: {
+    host: string;
+    wallet: string;
+    passphrase: string;
+  }) => void;
+  disconnect: () => void;
+  isConnecting: boolean;
+  setIsConnecting: (isConnecting: boolean) => void;
+  keys: Key[];
+  activeKey: string;
+  setActiveKey: (key: string | null) => void;
+  isSelectingActiveKey: boolean;
+} | null>(null);
+
+export const WalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [token, setTokenState] = useState(cache(VEGA_WALLET_TOKEN_CACHE_KEY));
+  const [activeKey, setActiveKeyState] = useState(
+    cache(VEGA_WALLET_ACTIVEKEY_CACHE_KEY)
+  );
+  const [keys, setKeys] = useState<Key[]>([]);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSelectingActiveKey, setIsSelectingActiveKey] = useState(false);
+
+  const setActiveKey = (key: string | null) => {
+    cache(VEGA_WALLET_ACTIVEKEY_CACHE_KEY, key);
+    setActiveKeyState(key);
+  };
+
+  const setToken = (token: string | null) => {
+    cache(VEGA_WALLET_TOKEN_CACHE_KEY, token);
+    setTokenState(token);
+  };
+
+  const connect = async ({
+    host,
+    wallet,
+    passphrase,
+  }: {
+    host: string;
+    wallet: string;
+    passphrase: string;
+  }) => {
+    cache(VEGA_WALLET_HOST_CACHE_KEY, host);
+
+    const token = await getToken(wallet, passphrase);
+    setToken(token);
+
+    const keys = await getKeys();
+    setKeys(keys);
+    if (keys.length && !activeKey) {
+      setActiveKey(keys[0].pub);
+    }
+
+    setIsSelectingActiveKey(true);
+  };
+
+  async function disconnect() {
+    setToken(null);
+    setActiveKey(null);
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    const unsubs = [() => (mounted = false)];
+
+    const load = async () => {
+      if (!cache(VEGA_WALLET_TOKEN_CACHE_KEY)) return;
+      const keys = await getKeys();
+      if (mounted) setKeys(keys);
+    };
+
+    load();
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
+  }, []);
+
+  return (
+    <WalletContext.Provider
+      value={{
+        token,
+        connect,
+        disconnect,
+        isConnecting,
+        setIsConnecting,
+        keys,
+        activeKey,
+        setActiveKey,
+        isSelectingActiveKey,
+      }}
+    >
+      {children}
+    </WalletContext.Provider>
+  );
+};
+
+export function useWallet() {
+  const context = useContext(WalletContext);
+  if (!context) {
+    throw new Error('Missing vega wallet context');
+  }
+  const {
+    token,
+    connect,
+    disconnect,
+    isConnecting,
+    setIsConnecting,
+    keys,
+    activeKey,
+    setActiveKey,
+    isSelectingActiveKey,
+  } = context;
+
+  return {
+    token,
+    connect,
+    disconnect,
+    isConnecting,
+    setIsConnecting,
+    keys,
+    activeKey,
+    setActiveKey,
+    isSelectingActiveKey,
+  };
+}
+
+async function getToken(wallet: string, passphrase: string): Promise<string> {
+  const { token } = await request.wallet({
+    method: 'POST',
+    path: '/auth/token',
+    data: {
+      wallet,
+      passphrase,
+    },
+  });
+  return token;
+}
+
+async function getKeys(): Promise<Key[]> {
+  const { keys } = await request.wallet({
+    method: 'GET',
+    path: '/keys',
+    auth: true,
+  });
+  return keys;
+}
