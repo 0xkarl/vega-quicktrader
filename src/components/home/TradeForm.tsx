@@ -51,9 +51,11 @@ const TradeForm: FC = () => {
 
   return (
     <form {...{ onSubmit }}>
-      <Box className={clsx('flex', 'flex-col', classes.container)} p={2}>
-        <h3>Trade</h3>
-
+      <Box
+        className={clsx('flex', 'flex-col', classes.container)}
+        pt={2}
+        px={3}
+      >
         <FormControl fullWidth>
           <InputLabel shrink id='type-label'>
             Order Type

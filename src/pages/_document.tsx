@@ -58,7 +58,7 @@ export default class MyDocument extends Document {
           <meta name='theme-color' content={theme.palette.primary.main} />
           <link rel='icon' href='/favicon-32x32.png' />
           <link
-            href='https://fonts.googleapis.com/css?family=Work+Sans&display=swap'
+            href='https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap'
             rel='stylesheet'
           />
         </Head>

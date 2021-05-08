@@ -1,0 +1,28 @@
+import { CandleDetailsExtended } from '../types';
+export declare const Colors: {
+  BLACK: string;
+  WHITE: string;
+  GRAY_DARK: string;
+  GRAY_DARK_1: string;
+  GRAY_DARK_2: string;
+  GRAY: string;
+  GRAY_LIGHT: string;
+  GRAY_LIGHT_1: string;
+  GREEN: string;
+  GREEN_DARK: string;
+  GREEN_TRANSPARENT: string;
+  RED: string;
+  RED_TRANSPARENT: string;
+  TRANSPARENT: string;
+  VEGA_RED: string;
+  VEGA_ORANGE: string;
+  VEGA_GREEN: string;
+  VEGA_YELLOW: string;
+  BACKGROUND: string;
+};
+export declare function colorByChange(a: number, b: number): string;
+export declare function colorByMarketMovement(bullish: boolean | null): string;
+export declare const isUp: (d: CandleDetailsExtended) => boolean;
+export declare const redIfDownGreenIfUp: (d: CandleDetailsExtended) => string;
+export declare const candleFill: (d: CandleDetailsExtended) => string;
+export declare const candleStroke: (d: CandleDetailsExtended) => string;
