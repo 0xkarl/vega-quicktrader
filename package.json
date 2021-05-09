@@ -12,6 +12,7 @@
     "pennant": "0xkarl/pennant",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "styled-media-query": "^2.1.2",
     "subscriptions-transport-ws": "0.9.18",
     "unfetch": "4.2.0"
   },
@@ -60,10 +61,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
   }
 }

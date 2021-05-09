@@ -1,6 +1,10 @@
+| Desktop                                               | Mobile                                                |
+| ----------------------------------------------------- | ----------------------------------------------------- |
+| ![](https://vega-quicktrader.vercel.app/shots/lg.png) | ![](https://vega-quicktrader.vercel.app/shots/sm.png) |
+
 ### Vega QuickTrader
 
-### Live example
+#### Live Example
 
 https://vega-quicktrader.vercel.app
 

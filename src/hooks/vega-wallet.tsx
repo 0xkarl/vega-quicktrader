@@ -79,13 +79,13 @@ export const WalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }
 
   useEffect(() => {
-    let mounted = true;
-    const unsubs = [() => (mounted = false)];
+    let isMounted = true;
+    const unsubs = [() => (isMounted = false)];
 
     const load = async () => {
       if (!cache(VEGA_WALLET_TOKEN_CACHE_KEY)) return;
       const keys = await getKeys();
-      if (mounted) setKeys(keys);
+      if (isMounted) setKeys(keys);
     };
 
     load();

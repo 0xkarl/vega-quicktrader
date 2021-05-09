@@ -6,13 +6,18 @@ import ConnectVegaWallet from 'components/global/ConnectVegaWallet';
 
 import Home from 'pages/index';
 
+const MARGIN = 4;
+
 const useStyles = makeStyles((theme) => {
+  const margin = theme.spacing(MARGIN);
   return {
     container: {
-      margin: '0 50px',
-      padding: '100px 0 30px',
-      position: 'relative',
-      [theme.breakpoints.down('sm')]: {
+      [theme.breakpoints.up('sm')]: {
+        margin: `0 ${margin}px`,
+        padding: '100px 0 30px',
+        position: 'relative',
+      },
+      [theme.breakpoints.down('xs')]: {
         padding: '70px 0 10px',
         width: 'auto',
       },

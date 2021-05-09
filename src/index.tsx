@@ -2,25 +2,29 @@ import { StrictMode } from 'react';
 import { render } from 'react-dom';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/core/styles';
 
 import { WalletProvider } from 'hooks/vega-wallet';
 import { MarketsProvider } from 'hooks/markets';
+import { UIProvider } from 'hooks/ui';
+
 import App from 'components/global/App';
 import theme from 'utils/theme';
 import './styles.css';
 
 render(
   <StrictMode>
-    <MuiThemeProvider {...{ theme }}>
+    <ThemeProvider {...{ theme }}>
       <CssBaseline />
 
       <WalletProvider>
         <MarketsProvider>
-          <App />
+          <UIProvider>
+            <App />
+          </UIProvider>
         </MarketsProvider>
       </WalletProvider>
-    </MuiThemeProvider>
+    </ThemeProvider>
   </StrictMode>,
   document.getElementById('root')
 );

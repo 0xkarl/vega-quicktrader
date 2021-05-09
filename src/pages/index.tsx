@@ -8,22 +8,19 @@ import Tickers from 'components/home/Tickers';
 import TradeForm from 'components/home/TradeForm';
 import TradeChart from 'components/home/TradeChart';
 import Stats from 'components/home/Stats/Stats';
+import { LG, SM } from 'components/shared/Screen';
+import { useUI } from 'hooks/ui';
 
 const MARGIN = 2;
 
 const useStyles = makeStyles((theme) => {
-  const margin = theme.spacing(MARGIN);
   return {
     tickers: {},
     trade: {
-      display: 'grid',
-      gridTemplateColumns: '2fr 1fr',
-      minHeight: 300,
-      [theme.breakpoints.down('sm')]: {
-        columnGap: 0,
-        gridTemplateColumns: 'none',
-        rowGap: `${margin}px`,
-        gridTemplateRows: '1fr 1fr',
+      [theme.breakpoints.up('md')]: {
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr',
+        minHeight: 300,
       },
     },
     stats: {
@@ -34,6 +31,7 @@ const useStyles = makeStyles((theme) => {
 
 const Index: FC = () => {
   const classes = useStyles();
+  const { isShowingChartView } = useUI();
 
   return (
     <>
@@ -42,8 +40,11 @@ const Index: FC = () => {
       </Box>
       <Paper>
         <Box mb={MARGIN} className={clsx(classes.trade)}>
-          <TradeChart />
-          <TradeForm />
+          <LG>
+            <TradeChart />
+            <TradeForm />
+          </LG>
+          <SM>{isShowingChartView ? <TradeChart /> : <TradeForm />}</SM>
         </Box>
       </Paper>
       <Box mb={MARGIN} className={clsx(classes.stats)}>

@@ -9,6 +9,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 import { APP_NAME } from 'config';
 import { useWallet as useVegaWallet } from 'hooks/vega-wallet';
+import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -16,9 +17,6 @@ const useStyles = makeStyles((theme) => ({
   },
   account: {
     marginRight: 10,
-    [theme.breakpoints.down('sm')]: {
-      display: 'none',
-    },
   },
 }));
 
@@ -40,12 +38,15 @@ const Header: FC = () => {
       <Toolbar color='inherit'>
         <Typography variant='h6' className={'flex flex-grow'}>
           <div className={'flex flex-col'}>
-            <div>{APP_NAME}</div>
+            <LG>{APP_NAME}</LG>
+            <SM>
+              <img src='/favicon-32x32.png' alt='logo' width={32} height={32} />
+            </SM>
           </div>
         </Typography>
 
         {shortVegaActiveKey ? (
-          <Box className='flex'>
+          <Box className='flex items-center'>
             <div className={classes.account}>{shortVegaActiveKey}</div>
             <CloseIcon
               className='cursor-pointer'
@@ -57,7 +58,8 @@ const Header: FC = () => {
             color='secondary'
             onClick={() => setIsConnectingVegaWallet(true)}
           >
-            Connect Vega Wallet
+            <LG>Connect Vega Wallet</LG>
+            <SM>Connect</SM>
           </Button>
         )}
       </Toolbar>

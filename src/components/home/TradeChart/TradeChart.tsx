@@ -2,9 +2,6 @@ import { FC, useState, useRef, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 
-import { ApolloClient, HttpLink, InMemoryCache, split } from '@apollo/client';
-import { WebSocketLink } from '@apollo/client/link/ws';
-import { getMainDefinition } from '@apollo/client/utilities';
 import { Chart, ChartElement, ChartType, Overlay, Study } from 'pennant';
 
 // import ChartControls from './components/ChartControls';
@@ -12,36 +9,9 @@ import { ApolloDataSource } from './data-source/vega-protocol-data-source';
 import { Interval } from './api/vega-graphql';
 
 import { useMarkets } from 'hooks/markets';
+import { client } from 'vega/ws';
 
-const httpLink = new HttpLink({
-  uri: 'https://lb.testnet.vega.xyz/query',
-});
-
-const wsLink = new WebSocketLink({
-  uri: 'wss://lb.testnet.vega.xyz/query',
-  options: {
-    reconnect: true,
-  },
-});
-
-const splitLink = split(
-  ({ query }) => {
-    const definition = getMainDefinition(query);
-    return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
-    );
-  },
-  wsLink,
-  httpLink
-);
-
-const client = new ApolloClient({
-  link: splitLink,
-  cache: new InMemoryCache(),
-});
-
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     height: '60vh',
   },

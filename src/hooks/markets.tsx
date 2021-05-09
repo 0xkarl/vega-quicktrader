@@ -9,7 +9,11 @@ import {
 } from 'react';
 import * as api from 'vega/api';
 import { useWallet } from './vega-wallet';
-import { ID, Market, Position } from 'vega/types';
+import {
+  ID,
+  Market,
+  // Position
+} from 'vega/types';
 
 const MarketsContext = createContext<{
   marketsMap: Map<string, Market>;
@@ -23,13 +27,13 @@ const MarketsContext = createContext<{
     type: string;
     expiresAt?: number;
   }) => void;
-  positions: Position[];
+  // positions: Position[];
 } | null>(null);
 
 export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [marketsMap, setMarkets] = useState(new Map<string, Market>());
   const [activeMarketId, setActiveMarketId] = useState<ID | null>(null);
-  const [positions, setPositions] = useState<Position[]>([]);
+  // const [positions, setPositions] = useState<Position[]>([]);
 
   const { activeKey } = useWallet();
 
@@ -38,8 +42,8 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ]);
 
   useEffect(() => {
-    let isMounted = true;
-    const unsubs = [() => (isMounted = false)];
+    let isisMounted = true;
+    const unsubs = [() => (isisMounted = false)];
 
     const loadMarkets = async () => {
       const { markets } = await api.graphql(`
@@ -56,7 +60,7 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
       }
       `);
-      if (isMounted) {
+      if (isisMounted) {
         setMarkets(new Map(markets.map((m: Market) => [m.id, m])));
         const { id } =
           markets.find((m: Market) => ~m.name.search(/tesla/i)) ?? markets[0];
@@ -71,51 +75,51 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, [setMarkets]);
 
-  useEffect(() => {
-    if (!activeKey) return;
+  // useEffect(() => {
+  //   if (!activeKey) return;
 
-    let isMounted = true;
-    const unsubs = [() => (isMounted = false)];
+  //   let isisMounted = true;
+  //   const unsubs = [() => (isisMounted = false)];
 
-    const loadPositions = async () => {
-      const { parties } = await api.graphql(
-        `
-      query($id: ID!) {
-        parties(id: $id) {
-          positions {
-            market {
-              name
-              decimalPlaces
-            }
-            openVolume
-            realisedPNL
-            unrealisedPNL
-            averageEntryPrice
-            margins {
-              asset {
-                name
-                symbol
-              }
-            }
-          }
-        }
-      }
-      `,
-        {
-          id: activeKey,
-        }
-      );
-      if (isMounted) {
-        setPositions(parties[0].positions);
-      }
-    };
+  //   const loadPositions = async () => {
+  //     const { parties } = await api.graphql(
+  //       `
+  //     query($id: ID!) {
+  //       parties(id: $id) {
+  //         positions {
+  //           market {
+  //             name
+  //             decimalPlaces
+  //           }
+  //           openVolume
+  //           realisedPNL
+  //           unrealisedPNL
+  //           averageEntryPrice
+  //           margins {
+  //             asset {
+  //               name
+  //               symbol
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //     `,
+  //       {
+  //         id: activeKey,
+  //       }
+  //     );
+  //     if (isisMounted) {
+  //       setPositions(parties[0].positions);
+  //     }
+  //   };
 
-    loadPositions();
+  //   loadPositions();
 
-    return () => {
-      unsubs.forEach((unsub) => unsub());
-    };
-  }, [setPositions, activeKey]);
+  //   return () => {
+  //     unsubs.forEach((unsub) => unsub());
+  //   };
+  // }, [setPositions, activeKey]);
 
   const trade = async ({
     side,
@@ -166,7 +170,7 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         activeMarketId,
         setActiveMarketId,
         trade,
-        positions,
+        // positions,
       }}
     >
       {children}
@@ -185,7 +189,7 @@ export function useMarkets() {
     activeMarketId,
     setActiveMarketId,
     trade,
-    positions,
+    // positions,
   } = context;
 
   return {
@@ -194,6 +198,6 @@ export function useMarkets() {
     activeMarketId,
     setActiveMarketId,
     trade,
-    positions,
+    // positions,
   };
 }
