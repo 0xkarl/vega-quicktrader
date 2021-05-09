@@ -1,7 +1,4 @@
-import {
-  FC,
-  // ,useEffect
-} from 'react';
+import { FC, useEffect } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -27,29 +24,33 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const QUERY = `
+market {
+  id
+  name
+  decimalPlaces
+  tradableInstrument {
+    instrument {
+      code
+    }
+  }
+}
+openVolume
+realisedPNL
+unrealisedPNL
+averageEntryPrice
+margins {
+  asset {
+    name
+    symbol
+  }
+}`;
+
 const POSITIONS_QUERY = gql`
   query($partyId: ID!) {
     party(id: $partyId) {
       positions {
-        market {
-          name
-          decimalPlaces
-          tradableInstrument {
-            instrument {
-              code
-            }
-          }
-        }
-        openVolume
-        realisedPNL
-        unrealisedPNL
-        averageEntryPrice
-        margins {
-          asset {
-            name
-            symbol
-          }
-        }
+        ${QUERY}
       }
     }
   }
@@ -58,25 +59,7 @@ const POSITIONS_QUERY = gql`
 const POSITIONS_SUBSCRIPTION = gql`
   subscription($partyId: ID!) {
     positions(partyId: $partyId) {
-      market {
-        name
-        decimalPlaces
-        tradableInstrument {
-          instrument {
-            code
-          }
-        }
-      }
-      openVolume
-      realisedPNL
-      unrealisedPNL
-      averageEntryPrice
-      margins {
-        asset {
-          name
-          symbol
-        }
-      }
+      ${QUERY}
     }
   }
 `;
@@ -111,7 +94,7 @@ const Positions1: FC<{ activeKey: string }> = ({ activeKey }) => {
         } else {
           positions.push(position);
         }
-        console.log(positions);
+        // console.log(positions);
         return Object.assign({}, prev, {
           party: { positions },
         });
@@ -127,9 +110,9 @@ const Positions2: FC<{
 }> = ({ subscribeToPositionsChange, positions }) => {
   const classes = useStyles();
 
-  // useEffect(() => {
-  //   subscribeToPositionsChange();
-  // }, [subscribeToPositionsChange]);
+  useEffect(() => {
+    subscribeToPositionsChange();
+  }, [subscribeToPositionsChange]);
 
   return (
     <Box p={2}>
@@ -149,8 +132,8 @@ const Positions2: FC<{
             </TableRow>
           </TableHead>
           <TableBody>
-            {positions.map((position, i) => (
-              <TableRow key={i}>
+            {positions.map((position) => (
+              <TableRow key={position.market.id}>
                 <TableCell component='th' scope='row'>
                   {position.market.tradableInstrument.instrument.code}
                 </TableCell>
@@ -177,8 +160,12 @@ const Positions2: FC<{
         </Table>
       </LG>
       <SM>
-        {positions.map((position, i) => (
-          <Box className={classes.smPositionRow} key={i} py={2}>
+        {positions.map((position) => (
+          <Box
+            className={classes.smPositionRow}
+            key={position.market.id}
+            py={2}
+          >
             <Box>Market</Box>
             <Box>{position.market.tradableInstrument.instrument.code}</Box>
             <Box>Volume</Box>
