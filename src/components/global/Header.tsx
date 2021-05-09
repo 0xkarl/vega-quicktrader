@@ -24,7 +24,7 @@ const Header: FC = () => {
   const classes = useStyles();
   const {
     activeKey: vegaActiveKey,
-    setIsConnecting: setIsConnectingVegaWallet,
+    startConnecting: startConnectingVegaWallet,
     disconnect: disconnectVegaWallet,
   } = useVegaWallet();
 
@@ -40,7 +40,12 @@ const Header: FC = () => {
           <div className={'flex flex-col'}>
             <LG>{APP_NAME}</LG>
             <SM>
-              <img src='/favicon-32x32.png' alt='logo' width={32} height={32} />
+              <img
+                src='/favicon-196x196.png'
+                alt='logo'
+                width={32}
+                height={32}
+              />
             </SM>
           </div>
         </Typography>
@@ -54,10 +59,7 @@ const Header: FC = () => {
             ></CloseIcon>
           </Box>
         ) : (
-          <Button
-            color='secondary'
-            onClick={() => setIsConnectingVegaWallet(true)}
-          >
+          <Button color='secondary' onClick={startConnectingVegaWallet}>
             <LG>Connect Vega Wallet</LG>
             <SM>Connect</SM>
           </Button>

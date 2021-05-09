@@ -49,9 +49,9 @@ export async function graphql(
   return data;
 }
 
-export async function rest(endpoint: string, data: any): Promise<any> {
+export async function rest(endpoint: string, data?: any): Promise<any> {
   const res = await fetch('https://lb.testnet.vega.xyz' + endpoint, {
-    method: 'POST',
+    method: data ? 'POST' : 'GET',
     body: JSON.stringify(data),
     headers: {
       'content-type': 'application/json',

@@ -14,6 +14,8 @@ import {
   Market,
   // Position
 } from 'vega/types';
+import { VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY } from 'config';
+import cache from 'utils/cache';
 
 const MarketsContext = createContext<{
   marketsMap: Map<string, Market>;
@@ -22,7 +24,7 @@ const MarketsContext = createContext<{
   setActiveMarketId: (id: ID) => void;
   trade: (opts: {
     side: string;
-    price: number;
+    price?: number;
     size: number;
     type: string;
     expiresAt?: number;
@@ -32,7 +34,9 @@ const MarketsContext = createContext<{
 
 export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [marketsMap, setMarkets] = useState(new Map<string, Market>());
-  const [activeMarketId, setActiveMarketId] = useState<ID | null>(null);
+  const [activeMarketId, setActiveMarketIdState] = useState<ID | null>(
+    cache(VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY)
+  );
   // const [positions, setPositions] = useState<Position[]>([]);
 
   const { activeKey } = useWallet();
@@ -41,9 +45,14 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     marketsMap,
   ]);
 
+  const setActiveMarketId = (id: string | null) => {
+    setActiveMarketIdState(id);
+    cache(VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY, id);
+  };
+
   useEffect(() => {
-    let isisMounted = true;
-    const unsubs = [() => (isisMounted = false)];
+    let isMounted = true;
+    const unsubs = [() => (isMounted = false)];
 
     const loadMarkets = async () => {
       const { markets } = await api.graphql(`
@@ -60,11 +69,13 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
       }
       `);
-      if (isisMounted) {
+      if (isMounted) {
         setMarkets(new Map(markets.map((m: Market) => [m.id, m])));
-        const { id } =
-          markets.find((m: Market) => ~m.name.search(/tesla/i)) ?? markets[0];
-        setActiveMarketId(id);
+        if (!activeMarketId) {
+          const { id } =
+            markets.find((m: Market) => ~m.name.search(/tesla/i)) ?? markets[0];
+          setActiveMarketId(id);
+        }
       }
     };
 
@@ -73,13 +84,13 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return () => {
       unsubs.forEach((unsub) => unsub());
     };
-  }, [setMarkets]);
+  }, [setMarkets, activeMarketId]);
 
   // useEffect(() => {
   //   if (!activeKey) return;
 
-  //   let isisMounted = true;
-  //   const unsubs = [() => (isisMounted = false)];
+  //   let isMounted = true;
+  //   const unsubs = [() => (isMounted = false)];
 
   //   const loadPositions = async () => {
   //     const { parties } = await api.graphql(
@@ -109,7 +120,7 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   //         id: activeKey,
   //       }
   //     );
-  //     if (isisMounted) {
+  //     if (isMounted) {
   //       setPositions(parties[0].positions);
   //     }
   //   };
@@ -129,20 +140,26 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     expiresAt,
   }: {
     side: string;
-    price: number;
+    price?: number;
     size: number;
     type: string;
     expiresAt?: number;
   }) => {
     const market = marketsMap.get(activeMarketId!)!;
+    if (expiresAt) {
+      const { timestamp: blockchainTime } = await api.rest('/time');
+      expiresAt = parseInt(blockchainTime) + expiresAt * 10 ** 9;
+    }
     const { blob, submitId } = await api.rest('/orders/prepare/submit', {
       submission: {
         marketId: activeMarketId,
         partyId: activeKey,
-        price: price * Math.pow(10, market.decimalPlaces),
+        ...(price ? { price: price * Math.pow(10, market.decimalPlaces) } : {}),
         size,
         side: `SIDE_${side}`,
-        ...(expiresAt
+        ...(type === 'MARKET'
+          ? { timeInForce: 'TIME_IN_FORCE_IOC' }
+          : expiresAt
           ? { timeInForce: 'TIME_IN_FORCE_GTT', expiresAt }
           : { timeInForce: 'TIME_IN_FORCE_GTC' }),
         type: `TYPE_${type}`,

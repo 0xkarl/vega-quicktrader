@@ -1,4 +1,6 @@
 import { FC, useState } from 'react';
+import clsx from 'clsx';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -6,15 +8,18 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import clsx from 'clsx';
 import CloseIcon from '@material-ui/icons/Close';
+
 import { useWallet } from 'hooks/vega-wallet';
 
 const useStyles = makeStyles(() => ({
   container: {
     height: 400,
     gridRowGap: '1rem',
+  },
+  keyRow: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 }));
 
@@ -74,7 +79,7 @@ const ConnectVegaWallet: FC = () => {
                 setActiveKey(key.pub);
                 setIsConnecting(false);
               }}
-              className='cursor-pointer'
+              className={clsx('cursor-pointer', classes.keyRow)}
             >
               {key.pub}
             </Box>

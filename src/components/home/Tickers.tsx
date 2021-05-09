@@ -48,21 +48,23 @@ const Tickers: FC = () => {
       <SM>
         <Box className={clsx(classes.sm, 'flex items-center')}>
           <Box className='flex-grow'>
-            <Select
-              labelId='tickers-label'
-              id='tickers'
-              value={activeMarketId}
-              onChange={(e) => {
-                const id = e.target.value! as string;
-                setActiveMarketId(id);
-              }}
-            >
-              {marketsList.map((m) => (
-                <MenuItem value={m.id} key={m.id}>
-                  {m.tradableInstrument.instrument.code}
-                </MenuItem>
-              ))}
-            </Select>
+            {!activeMarketId ? null : (
+              <Select
+                labelId='tickers-label'
+                id='tickers'
+                value={activeMarketId}
+                onChange={(e) => {
+                  const id = e.target.value! as string;
+                  setActiveMarketId(id);
+                }}
+              >
+                {marketsList.map((m) => (
+                  <MenuItem value={m.id} key={m.id}>
+                    {m.tradableInstrument.instrument.code}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
           </Box>
 
           <Box className='cursor-pointer' onClick={toggleIsShowingChartView}>

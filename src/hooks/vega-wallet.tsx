@@ -9,7 +9,7 @@ import {
 import {
   VEGA_WALLET_TOKEN_CACHE_KEY,
   VEGA_WALLET_HOST_CACHE_KEY,
-  VEGA_WALLET_ACTIVEKEY_CACHE_KEY,
+  VEGA_WALLET_ACTIVE_KEY_CACHE_KEY,
 } from 'config';
 import cache from 'utils/cache';
 import * as api from 'vega/api';
@@ -29,25 +29,31 @@ const WalletContext = createContext<{
   activeKey: string;
   setActiveKey: (key: string | null) => void;
   isSelectingActiveKey: boolean;
+  startConnecting: () => void;
 } | null>(null);
 
 export const WalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [token, setTokenState] = useState(cache(VEGA_WALLET_TOKEN_CACHE_KEY));
   const [activeKey, setActiveKeyState] = useState(
-    cache(VEGA_WALLET_ACTIVEKEY_CACHE_KEY)
+    cache(VEGA_WALLET_ACTIVE_KEY_CACHE_KEY)
   );
   const [keys, setKeys] = useState<Key[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSelectingActiveKey, setIsSelectingActiveKey] = useState(false);
 
   const setActiveKey = (key: string | null) => {
-    cache(VEGA_WALLET_ACTIVEKEY_CACHE_KEY, key);
+    cache(VEGA_WALLET_ACTIVE_KEY_CACHE_KEY, key);
     setActiveKeyState(key);
   };
 
   const setToken = (token: string | null) => {
     cache(VEGA_WALLET_TOKEN_CACHE_KEY, token);
     setTokenState(token);
+  };
+
+  const startConnecting = () => {
+    setIsSelectingActiveKey(false);
+    setIsConnecting(true);
   };
 
   const connect = async ({
@@ -107,6 +113,7 @@ export const WalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
         activeKey,
         setActiveKey,
         isSelectingActiveKey,
+        startConnecting,
       }}
     >
       {children}
@@ -129,6 +136,7 @@ export function useWallet() {
     activeKey,
     setActiveKey,
     isSelectingActiveKey,
+    startConnecting,
   } = context;
 
   return {
@@ -141,6 +149,7 @@ export function useWallet() {
     activeKey,
     setActiveKey,
     isSelectingActiveKey,
+    startConnecting,
   };
 }
 

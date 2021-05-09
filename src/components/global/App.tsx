@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
-import Header from 'components/global/Header';
-import ConnectVegaWallet from 'components/global/ConnectVegaWallet';
+import Header from './Header';
+import ConnectVegaWallet from './ConnectVegaWallet';
+import Notifications from './Notifications';
 
 import Home from 'pages/index';
 
@@ -36,6 +37,7 @@ const App: FC = () => {
       <Header />
       <Home />
       <ConnectVegaWallet />
+      <Notifications />
     </div>
   );
 };

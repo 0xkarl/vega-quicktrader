@@ -1,4 +1,6 @@
 import { FC, useState } from 'react';
+import clsx from 'clsx';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -6,9 +8,9 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import clsx from 'clsx';
+
 import { useMarkets } from 'hooks/markets';
+import { useUI } from 'hooks/ui';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -20,8 +22,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const EXPIRE_TYPES = ['Never', '1 minute', '1 hour', '1 day'];
+const EXPIRE_TYPES = [
+  ['Never', 0],
+  ['1 minute', 1 * 60],
+  ['1 hour', 60 * 60],
+  ['1 day', 24 * 60 * 60],
+];
 const ORDER_TYPES = ['LIMIT', 'MARKET'];
+// const MARKET_ORDER_TIME_IN_FORCE_TYPES = [
+//   ['Immediate or cancel', 'IOC'],
+//   ['Fill or kill', 'FOK'],
+// ];
 
 const TradeForm: FC = () => {
   const classes = useStyles();
@@ -29,7 +40,10 @@ const TradeForm: FC = () => {
   const [isWorking, setIsWorking] = useState<string | null>();
   const [side, setSide] = useState<string>('');
   const [orderType, setOrderType] = useState(ORDER_TYPES[0]);
-  const [expireType, setExpireType] = useState(0);
+  const [expiresAt, setExpiresAt] = useState(0);
+  const { showErrorNotification } = useUI();
+
+  const isMarketOrder = orderType === ORDER_TYPES[1];
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
@@ -37,13 +51,24 @@ const TradeForm: FC = () => {
 
     setIsWorking('Trading...');
     try {
-      await trade({
-        price: parseFloat(form.price.value),
-        size: parseFloat(form.size.value),
-        type: orderType,
-        side,
-      });
+      if (isMarketOrder) {
+        await trade({
+          size: parseFloat(form.size.value),
+          type: orderType,
+          side,
+        });
+      } else {
+        await trade({
+          price: parseFloat(form.price.value),
+          size: parseFloat(form.size.value),
+          type: orderType,
+          side,
+          expiresAt,
+        });
+      }
       form.reset();
+    } catch (e) {
+      showErrorNotification(e);
     } finally {
       setIsWorking(null);
     }
@@ -84,38 +109,66 @@ const TradeForm: FC = () => {
           required
         />
 
-        <TextField
-          id='price'
-          label='Unit Price'
-          type='number'
-          inputProps={{
-            step: 'any',
-          }}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          fullWidth
-          required
-        />
+        {isMarketOrder ? null : (
+          <TextField
+            id='price'
+            label='Price'
+            type='number'
+            inputProps={{
+              step: 'any',
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            fullWidth
+            required
+          />
+        )}
 
-        <FormControl fullWidth>
-          <InputLabel shrink id='expires-label'>
-            Expires
-          </InputLabel>
-          <Select
-            labelId='expires-label'
-            id='expiresAt'
-            value={expireType}
-            onChange={(e) => setExpireType(Number(e.target.value!))}
-            displayEmpty
-          >
-            {EXPIRE_TYPES.map((name, i) => (
-              <MenuItem value={i} key={i}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
+        {isMarketOrder ? (
+          <>
+            {/* 
+          <FormControl fullWidth>
+            <InputLabel shrink id='time-in-force-label'>
+              Time In Force
+            </InputLabel>
+            <Select
+              labelId='time-in-force-label'
+              id='time-in-force'
+              value={timeInForce}
+              onChange={(e) => setTimeInForce(e.target.value!)}
+              displayEmpty
+            >
+              {MARKET_ORDER_TIME_IN_FORCE_TYPES.map(([k, v]) => (
+                <MenuItem value={v} key={v}>
+                  {k}
+                </MenuItem>
+              ))}
+            </Select>
         </FormControl>
+         */}
+            {null}
+          </>
+        ) : (
+          <FormControl fullWidth>
+            <InputLabel shrink id='expires-label'>
+              Expires
+            </InputLabel>
+            <Select
+              labelId='expires-label'
+              id='expiresAt'
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(Number(e.target.value!))}
+              displayEmpty
+            >
+              {EXPIRE_TYPES.map(([name, time]) => (
+                <MenuItem value={time} key={time}>
+                  {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
 
         <Box className={clsx('grid', classes.footer)}>
           <Button
