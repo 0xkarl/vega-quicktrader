@@ -6,3 +6,6 @@ export const VEGA_WALLET_HOST_CACHE_KEY = 'vega-wallet-host';
 export const VEGA_WALLET_ACTIVE_KEY_CACHE_KEY = 'vega-wallet-activekey';
 export const VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY =
   'vega-wallet-active-market-id';
+
+export const LG_BREAKPOINT = 'md';
+export const SM_BREAKPOINT = 'sm';

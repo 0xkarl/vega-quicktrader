@@ -6,6 +6,7 @@ import ConnectVegaWallet from './ConnectVegaWallet';
 import Notifications from './Notifications';
 
 import Home from 'pages/index';
+import { LG_BREAKPOINT, SM_BREAKPOINT } from 'config';
 
 const MARGIN = 4;
 
@@ -13,12 +14,12 @@ const useStyles = makeStyles((theme) => {
   const margin = theme.spacing(MARGIN);
   return {
     container: {
-      [theme.breakpoints.up('sm')]: {
+      [theme.breakpoints.up(LG_BREAKPOINT)]: {
         margin: `0 ${margin}px`,
         padding: '100px 0 30px',
         position: 'relative',
       },
-      [theme.breakpoints.down('xs')]: {
+      [theme.breakpoints.down(SM_BREAKPOINT)]: {
         padding: '70px 0 10px',
         width: 'auto',
       },
