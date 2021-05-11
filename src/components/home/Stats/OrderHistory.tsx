@@ -1,8 +1,9 @@
 import { FC } from 'react';
-import Box from '@material-ui/core/Box';
+import { Order } from 'vega/types';
+import Orders from './_Orders';
 
-const OrderHistory: FC = () => {
-  return <Box p={2}>Todo</Box>;
+const OpenOrders: FC = () => {
+  return <Orders filter={(order: Order) => true} />;
 };
 
-export default OrderHistory;
+export default OpenOrders;

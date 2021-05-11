@@ -1,8 +1,9 @@
 import { FC } from 'react';
-import Box from '@material-ui/core/Box';
+import { Order } from 'vega/types';
+import Orders from './_Orders';
 
 const OpenOrders: FC = () => {
-  return <Box p={2}>Todo</Box>;
+  return <Orders filter={(order: Order) => order.status === 'Filled'} />;
 };
 
 export default OpenOrders;
