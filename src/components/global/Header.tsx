@@ -1,11 +1,14 @@
 import { FC, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
+import clsx from 'clsx';
 import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
+import { withRouter } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { APP_NAME } from 'config';
 import { useWallet as useVegaWallet } from 'hooks/vega-wallet';
@@ -18,7 +21,20 @@ const useStyles = makeStyles((theme) => ({
   account: {
     marginRight: 10,
   },
+  links: {},
+  link: {
+    color: theme.palette.text.primary,
+    textDecoration: 'none',
+  },
+  activeLink: {
+    color: theme.palette.secondary.main,
+  },
 }));
+
+const OPTIONS = [
+  ['Trade', '/trade'],
+  ['Wallet', '/wallet'],
+];
 
 const Header: FC = () => {
   const classes = useStyles();
@@ -32,6 +48,8 @@ const Header: FC = () => {
     if (!vegaActiveKey) return null;
     return `${vegaActiveKey.slice(0, 4)}..${vegaActiveKey.slice(-4)}`;
   }, [vegaActiveKey]);
+
+  const path = window.location.pathname;
 
   return (
     <AppBar position='fixed' color='inherit' className={classes.container}>
@@ -49,6 +67,20 @@ const Header: FC = () => {
             </SM>
           </div>
         </Typography>
+
+        <Box className={clsx(classes.links, 'flex')} mr={4}>
+          {OPTIONS.map(([name, link]) => (
+            <Link
+              key={link}
+              to={link}
+              className={clsx(classes.link, {
+                [classes.activeLink]: link === path,
+              })}
+            >
+              <Box mx={1}>{name}</Box>
+            </Link>
+          ))}
+        </Box>
 
         {shortVegaActiveKey ? (
           <Box className='flex items-center'>
@@ -69,4 +101,4 @@ const Header: FC = () => {
   );
 };
 
-export default Header;
+export default withRouter(Header);

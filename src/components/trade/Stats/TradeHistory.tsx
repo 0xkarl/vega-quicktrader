@@ -139,7 +139,6 @@ const TradesSubscribe: FC<{
                       {trade.price / Math.pow(10, trade.market.decimalPlaces)}
                     </TableCell>
                     <TableCell align='right'>{trade.createdAt}</TableCell>
-                    <TableCell align='right'>-</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -1,11 +1,10 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import Header from './Header';
 import ConnectVegaWallet from './ConnectVegaWallet';
 import Notifications from './Notifications';
 
-import Home from 'pages/index';
 import { LG_BREAKPOINT, SM_BREAKPOINT } from 'config';
 
 const MARGIN = 4;
@@ -30,13 +29,13 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-const App: FC = () => {
+const App: FC<{ children: ReactNode }> = ({ children }) => {
   const classes = useStyles();
 
   return (
     <div className={classes.container}>
       <Header />
-      <Home />
+      {children}
       <ConnectVegaWallet />
       <Notifications />
     </div>

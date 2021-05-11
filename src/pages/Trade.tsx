@@ -4,10 +4,10 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 
-import Tickers from 'components/home/Tickers';
-import TradeForm from 'components/home/TradeForm';
-import TradeChart from 'components/home/TradeChart';
-import Stats from 'components/home/Stats/Stats';
+import Tickers from 'components/trade/Tickers';
+import TradeForm from 'components/trade/TradeForm';
+import TradeChart from 'components/trade/TradeChart';
+import Stats from 'components/trade/Stats/Stats';
 import { LG, SM } from 'components/shared/Screen';
 import { useUI } from 'hooks/ui';
 
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-const Index: FC = () => {
+const Trade: FC = () => {
   const classes = useStyles();
   const { isShowingChartView } = useUI();
 
@@ -54,4 +54,4 @@ const Index: FC = () => {
   );
 };
 
-export default Index;
+export default Trade;
