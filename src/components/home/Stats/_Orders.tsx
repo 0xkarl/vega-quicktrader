@@ -67,14 +67,14 @@ const ORDERS_SUBSCRIPTION = gql`
 
 const Orders: FC<{ filter: (order: Order) => boolean }> = ({ filter }) => {
   const { activeKey } = useWallet();
-  return !activeKey ? null : <Orders1 {...{ activeKey, filter }} />;
+  return !activeKey ? null : <OrdersQuery {...{ activeKey, filter }} />;
 };
 
-const Orders1: FC<{ activeKey: string; filter: (order: Order) => boolean }> = ({
-  activeKey,
-  filter,
-}) => {
-  const { subscribeToMore, data } = useQuery(ORDERS_QUERY, {
+const OrdersQuery: FC<{
+  activeKey: string;
+  filter: (order: Order) => boolean;
+}> = ({ activeKey, filter }) => {
+  const { subscribeToMore, data, loading } = useQuery(ORDERS_QUERY, {
     variables: { partyId: activeKey },
     client: client,
   });
@@ -92,9 +92,7 @@ const Orders1: FC<{ activeKey: string; filter: (order: Order) => boolean }> = ({
         );
 
         const order: Order = subscriptionData.data.orders;
-        const idx = orders.findIndex(
-          (p: Order) => p.market.id === order.market.id
-        );
+        const idx = orders.findIndex((p: Order) => p.id === order.id);
         if (~idx) {
           orders[idx] = order;
         } else {
@@ -107,13 +105,14 @@ const Orders1: FC<{ activeKey: string; filter: (order: Order) => boolean }> = ({
       },
     });
 
-  return <Orders2 {...{ orders, subscribeToOrdersChange }} />;
+  return <OrdersSubscribe {...{ orders, subscribeToOrdersChange, loading }} />;
 };
 
-const Orders2: FC<{
+const OrdersSubscribe: FC<{
   subscribeToOrdersChange: () => void;
   orders: Order[];
-}> = ({ subscribeToOrdersChange, orders }) => {
+  loading: boolean;
+}> = ({ subscribeToOrdersChange, orders, loading }) => {
   const classes = useStyles();
 
   useEffect(() => {
@@ -122,60 +121,70 @@ const Orders2: FC<{
 
   return (
     <Box p={2}>
-      <LG>
-        <Table aria-label='Loans' size={'small'}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Market</TableCell>
-              <TableCell align='right'>Size</TableCell>
-              <TableCell align='right'>Type</TableCell>
-              <TableCell align='right'>TIF</TableCell>
-              <TableCell align='right'>Price</TableCell>
-              <TableCell align='right'>Created At</TableCell>
-              <TableCell align='right'>Status</TableCell>
-              <TableCell align='right'></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      {loading ? (
+        <Box>Loading...</Box>
+      ) : !orders.length ? (
+        <Box>No orders found.</Box>
+      ) : (
+        <>
+          <LG>
+            <Table aria-label='Loans' size={'small'}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Market</TableCell>
+                  <TableCell align='right'>Size</TableCell>
+                  <TableCell align='right'>Type</TableCell>
+                  <TableCell align='right'>TIF</TableCell>
+                  <TableCell align='right'>Price</TableCell>
+                  <TableCell align='right'>Created At</TableCell>
+                  <TableCell align='right'>Status</TableCell>
+                  <TableCell align='right'></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell component='th' scope='row'>
+                      {order.market.tradableInstrument.instrument.code}
+                    </TableCell>
+                    <TableCell>{order.size}</TableCell>
+                    <TableCell align='right'>{order.type}</TableCell>
+                    <TableCell align='right'>{order.timeInForce}</TableCell>
+                    <TableCell align='right'>
+                      {order.price / Math.pow(10, order.market.decimalPlaces)}
+                    </TableCell>
+                    <TableCell align='right'>{order.createdAt}</TableCell>
+                    <TableCell align='right'>{order.status}</TableCell>
+                    <TableCell align='right'>-</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </LG>
+          <SM>
             {orders.map((order) => (
-              <TableRow key={order.market.id}>
-                <TableCell component='th' scope='row'>
-                  {order.market.tradableInstrument.instrument.code}
-                </TableCell>
-                <TableCell>{order.size}</TableCell>
-                <TableCell align='right'>{order.type}</TableCell>
-                <TableCell align='right'>{order.timeInForce}</TableCell>
-                <TableCell align='right'>
+              <Box className={classes.smOrderRow} key={order.id} py={2}>
+                <Box>Market</Box>
+                <Box>{order.market.tradableInstrument.instrument.code}</Box>
+                <Box>Size</Box>
+                <Box>{order.size}</Box>
+                <Box>Type</Box>
+                <Box>{order.type}</Box>
+                <Box>TIF</Box>
+                <Box>{order.timeInForce}</Box>
+                <Box>Price</Box>
+                <Box>
                   {order.price / Math.pow(10, order.market.decimalPlaces)}
-                </TableCell>
-                <TableCell align='right'>{order.createdAt}</TableCell>
-                <TableCell align='right'>{order.status}</TableCell>
-                <TableCell align='right'>-</TableCell>
-              </TableRow>
+                </Box>
+                <Box>Created At</Box>
+                <Box>{order.createdAt}</Box>
+                <Box>Status</Box>
+                <Box>{order.status}</Box>
+              </Box>
             ))}
-          </TableBody>
-        </Table>
-      </LG>
-      <SM>
-        {orders.map((order) => (
-          <Box className={classes.smOrderRow} key={order.market.id} py={2}>
-            <Box>Market</Box>
-            <Box>{order.market.tradableInstrument.instrument.code}</Box>
-            <Box>Size</Box>
-            <Box>{order.size}</Box>
-            <Box>Type</Box>
-            <Box>{order.type}</Box>
-            <Box>TIF</Box>
-            <Box>{order.timeInForce}</Box>
-            <Box>Price</Box>
-            <Box>{order.price / Math.pow(10, order.market.decimalPlaces)}</Box>
-            <Box>Created At</Box>
-            <Box>{order.createdAt}</Box>
-            <Box>Status</Box>
-            <Box>{order.status}</Box>
-          </Box>
-        ))}
-      </SM>
+          </SM>
+        </>
+      )}
     </Box>
   );
 };

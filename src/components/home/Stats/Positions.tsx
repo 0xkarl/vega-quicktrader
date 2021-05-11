@@ -66,11 +66,11 @@ const POSITIONS_SUBSCRIPTION = gql`
 
 const Positions: FC = () => {
   const { activeKey } = useWallet();
-  return !activeKey ? null : <Positions1 {...{ activeKey }} />;
+  return !activeKey ? null : <PositionsQuery {...{ activeKey }} />;
 };
 
-const Positions1: FC<{ activeKey: string }> = ({ activeKey }) => {
-  const { subscribeToMore, data } = useQuery(POSITIONS_QUERY, {
+const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
+  const { subscribeToMore, data, loading } = useQuery(POSITIONS_QUERY, {
     variables: { partyId: activeKey },
     client: client,
   });
@@ -83,7 +83,7 @@ const Positions1: FC<{ activeKey: string }> = ({ activeKey }) => {
       variables: { partyId: activeKey },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
-        const positions: Position[] = prev?.party?.positions.slice() ?? [];
+        const positions: Position[] = prev?.party?.positions?.slice() ?? [];
 
         const position: Position = subscriptionData.data.positions;
         const idx = positions.findIndex(
@@ -101,13 +101,18 @@ const Positions1: FC<{ activeKey: string }> = ({ activeKey }) => {
       },
     });
 
-  return <Positions2 {...{ positions, subscribeToPositionsChange }} />;
+  return (
+    <PositionsSubscribe
+      {...{ positions, subscribeToPositionsChange, loading }}
+    />
+  );
 };
 
-const Positions2: FC<{
+const PositionsSubscribe: FC<{
   subscribeToPositionsChange: () => void;
   positions: Position[];
-}> = ({ subscribeToPositionsChange, positions }) => {
+  loading: boolean;
+}> = ({ subscribeToPositionsChange, positions, loading }) => {
   const classes = useStyles();
 
   useEffect(() => {
@@ -116,78 +121,86 @@ const Positions2: FC<{
 
   return (
     <Box p={2}>
-      <LG>
-        <Table aria-label='Loans' size={'small'}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Market</TableCell>
-              <TableCell>Settled In</TableCell>
-              <TableCell align='right'>Open Volume</TableCell>
-              <TableCell align='right'>Average Entry Price</TableCell>
-              <TableCell align='right'>Mark Price</TableCell>
-              <TableCell align='right'>Allocated Margin</TableCell>
-              <TableCell align='right'>Unrealised PNL</TableCell>
-              <TableCell align='right'>Realised PNL</TableCell>
-              <TableCell align='right'></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      {loading ? (
+        <Box>Loading...</Box>
+      ) : !positions.length ? (
+        <Box>No positions found.</Box>
+      ) : (
+        <>
+          <LG>
+            <Table aria-label='Loans' size={'small'}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Market</TableCell>
+                  <TableCell>Settled In</TableCell>
+                  <TableCell align='right'>Open Volume</TableCell>
+                  <TableCell align='right'>Average Entry Price</TableCell>
+                  <TableCell align='right'>Mark Price</TableCell>
+                  <TableCell align='right'>Allocated Margin</TableCell>
+                  <TableCell align='right'>Unrealised PNL</TableCell>
+                  <TableCell align='right'>Realised PNL</TableCell>
+                  <TableCell align='right'></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {positions.map((position) => (
+                  <TableRow key={position.market.id}>
+                    <TableCell component='th' scope='row'>
+                      {position.market.tradableInstrument.instrument.code}
+                    </TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>{position.openVolume}</TableCell>
+                    <TableCell align='right'>
+                      {position.averageEntryPrice /
+                        Math.pow(10, position.market.decimalPlaces)}
+                    </TableCell>
+                    <TableCell align='right'>-</TableCell>
+                    <TableCell align='right'>-</TableCell>
+                    <TableCell align='right'>
+                      {position.unrealisedPNL /
+                        Math.pow(10, position.market.decimalPlaces)}
+                    </TableCell>
+                    <TableCell align='right'>
+                      {position.realisedPNL /
+                        Math.pow(10, position.market.decimalPlaces)}
+                    </TableCell>
+                    <TableCell align='right'>-</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </LG>
+          <SM>
             {positions.map((position) => (
-              <TableRow key={position.market.id}>
-                <TableCell component='th' scope='row'>
-                  {position.market.tradableInstrument.instrument.code}
-                </TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>{position.openVolume}</TableCell>
-                <TableCell align='right'>
+              <Box
+                className={classes.smPositionRow}
+                key={position.market.id}
+                py={2}
+              >
+                <Box>Market</Box>
+                <Box>{position.market.tradableInstrument.instrument.code}</Box>
+                <Box>Volume</Box>
+                <Box>{position.openVolume}</Box>
+                <Box>Price</Box>
+                <Box>
                   {position.averageEntryPrice /
                     Math.pow(10, position.market.decimalPlaces)}
-                </TableCell>
-                <TableCell align='right'>-</TableCell>
-                <TableCell align='right'>-</TableCell>
-                <TableCell align='right'>
+                </Box>
+                <Box>Unrealized PNL</Box>
+                <Box>
                   {position.unrealisedPNL /
                     Math.pow(10, position.market.decimalPlaces)}
-                </TableCell>
-                <TableCell align='right'>
+                </Box>
+                <Box>Realized PNl</Box>
+                <Box>
                   {position.realisedPNL /
                     Math.pow(10, position.market.decimalPlaces)}
-                </TableCell>
-                <TableCell align='right'>-</TableCell>
-              </TableRow>
+                </Box>
+              </Box>
             ))}
-          </TableBody>
-        </Table>
-      </LG>
-      <SM>
-        {positions.map((position) => (
-          <Box
-            className={classes.smPositionRow}
-            key={position.market.id}
-            py={2}
-          >
-            <Box>Market</Box>
-            <Box>{position.market.tradableInstrument.instrument.code}</Box>
-            <Box>Volume</Box>
-            <Box>{position.openVolume}</Box>
-            <Box>Price</Box>
-            <Box>
-              {position.averageEntryPrice /
-                Math.pow(10, position.market.decimalPlaces)}
-            </Box>
-            <Box>Unrealized PNL</Box>
-            <Box>
-              {position.unrealisedPNL /
-                Math.pow(10, position.market.decimalPlaces)}
-            </Box>
-            <Box>Realized PNl</Box>
-            <Box>
-              {position.realisedPNL /
-                Math.pow(10, position.market.decimalPlaces)}
-            </Box>
-          </Box>
-        ))}
-      </SM>
+          </SM>
+        </>
+      )}
     </Box>
   );
 };

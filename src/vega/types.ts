@@ -38,50 +38,6 @@ export interface Position {
   margins: Margin[];
 }
 
-// export enum OrderTimeInForce {
-//   FOK,
-//   IOC,
-//   GTC,
-//   GTT,
-//   GFA,
-//   GFN,
-// }
-
-// export enum OrderStatus {
-//   Active,
-//   Expired,
-//   Cancelled,
-//   Stopped,
-//   Filled,
-//   Rejected,
-//   PartiallyFilled,
-//   Parked,
-// }
-
-// export enum Side {
-//   Buy,
-//   Sell,
-// }
-
-// export enum OrderType {
-//   MARKET,
-//   LIMIT,
-//   NETWORK,
-// }
-// export interface Order {
-//   id: ID;
-//   price: number;
-//   timeInForce: OrderTimeInForce;
-//   side: Side;
-//   market: Market;
-//   size: number;
-//   remaining: string;
-//   createdAt: string;
-//   expiresAt: string;
-//   status: OrderStatus;
-//   type: OrderType;
-// }
-
 export interface Order {
   id: ID;
   price: number;
@@ -94,4 +50,12 @@ export interface Order {
   expiresAt: string;
   status: string;
   type: string;
+}
+
+export interface Trade {
+  id: ID;
+  market: Market;
+  price: number;
+  size: number;
+  createdAt: string;
 }
