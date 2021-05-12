@@ -44,7 +44,8 @@ margins {
     name
     symbol
   }
-}`;
+}
+updatedAt`;
 
 const POSITIONS_QUERY = gql`
   query($partyId: ID!) {
@@ -75,7 +76,13 @@ const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
     client: client,
   });
 
-  const positions: Position[] = data?.party?.positions ?? [];
+  const positions: Position[] = data?.party?.positions?.slice() ?? [];
+
+  positions.sort((a: Position, b: Position) => {
+    if (a.updatedAt > b.updatedAt) return -1;
+    if (a.updatedAt < b.updatedAt) return 1;
+    return 0;
+  });
 
   const subscribeToPositionsChange = () =>
     subscribeToMore({
@@ -85,7 +92,9 @@ const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
         if (!subscriptionData.data) return prev;
         const positions: Position[] = prev?.party?.positions?.slice() ?? [];
 
-        const position: Position = subscriptionData.data.positions;
+        const position: Position =
+          subscriptionData.data.positions[0] ?? subscriptionData.data.positions;
+
         const idx = positions.findIndex(
           (p: Position) => p.market.id === position.market.id
         );
@@ -94,7 +103,6 @@ const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
         } else {
           positions.push(position);
         }
-        // console.log(positions);
         return Object.assign({}, prev, {
           party: { positions },
         });

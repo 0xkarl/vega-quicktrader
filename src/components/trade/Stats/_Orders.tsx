@@ -80,6 +80,11 @@ const OrdersQuery: FC<{
   });
 
   const orders: Order[] = (data?.party?.orders ?? []).filter(filter);
+  orders.sort((a: Order, b: Order) => {
+    if (a.createdAt > b.createdAt) return -1;
+    if (a.createdAt < b.createdAt) return 1;
+    return 0;
+  });
 
   const subscribeToOrdersChange = () =>
     subscribeToMore({
@@ -91,14 +96,15 @@ const OrdersQuery: FC<{
           filter
         );
 
-        const order: Order = subscriptionData.data.orders;
+        const order: Order =
+          subscriptionData.data.orders[0] ?? subscriptionData.data.orders;
         const idx = orders.findIndex((p: Order) => p.id === order.id);
         if (~idx) {
           orders[idx] = order;
         } else {
           orders.push(order);
         }
-        // console.log(orders);
+
         return Object.assign({}, prev, {
           party: { orders },
         });

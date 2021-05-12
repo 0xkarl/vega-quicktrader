@@ -36,6 +36,7 @@ export interface Position {
   unrealisedPNL: number;
   averageEntryPrice: number;
   margins: Margin[];
+  updatedAt: string;
 }
 
 export interface Order {

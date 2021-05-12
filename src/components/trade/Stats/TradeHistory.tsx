@@ -73,6 +73,11 @@ const TradesQuery: FC<{
   });
 
   const trades: Trade[] = data?.party?.trades ?? [];
+  trades.sort((a: Trade, b: Trade) => {
+    if (a.createdAt > b.createdAt) return -1;
+    if (a.createdAt < b.createdAt) return 1;
+    return 0;
+  });
 
   const subscribeToTradesChange = () =>
     subscribeToMore({
@@ -82,14 +87,15 @@ const TradesQuery: FC<{
         if (!subscriptionData.data) return prev;
         const trades: Trade[] = prev?.party?.trades?.slice() ?? [];
 
-        const trade: Trade = subscriptionData.data.trades;
+        const trade: Trade =
+          subscriptionData.data.trades[0] ?? subscriptionData.data.trades;
         const idx = trades.findIndex((p: Trade) => p.id === trade.id);
         if (~idx) {
           trades[idx] = trade;
         } else {
           trades.push(trade);
         }
-        // console.log(trades);
+
         return Object.assign({}, prev, {
           party: { trades },
         });
