@@ -8,6 +8,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import { WalletProvider } from 'hooks/vega-wallet';
 import { MarketsProvider } from 'hooks/markets';
 import { UIProvider } from 'hooks/ui';
+import { PartyProvider } from 'hooks/party';
 
 import Trade from 'pages/Trade';
 import Wallet from 'pages/Wallet';
@@ -23,21 +24,23 @@ render(
 
       <WalletProvider>
         <MarketsProvider>
-          <UIProvider>
-            <BrowserRouter>
-              <App>
-                <Switch>
-                  <Route path='/wallet'>
-                    <Wallet />
-                  </Route>
-                  <Route path='/trade'>
-                    <Trade />
-                  </Route>
-                  <Redirect to='/trade' />
-                </Switch>
-              </App>
-            </BrowserRouter>
-          </UIProvider>
+          <PartyProvider>
+            <UIProvider>
+              <BrowserRouter>
+                <App>
+                  <Switch>
+                    <Route path='/wallet'>
+                      <Wallet />
+                    </Route>
+                    <Route path='/trade'>
+                      <Trade />
+                    </Route>
+                    <Redirect to='/trade' />
+                  </Switch>
+                </App>
+              </BrowserRouter>
+            </UIProvider>
+          </PartyProvider>
         </MarketsProvider>
       </WalletProvider>
     </ThemeProvider>

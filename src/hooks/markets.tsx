@@ -9,11 +9,7 @@ import {
 } from 'react';
 import * as api from 'vega/api';
 import { useWallet } from './vega-wallet';
-import {
-  ID,
-  Market,
-  // Position
-} from 'vega/types';
+import { ID, Market } from 'vega/types';
 import { VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY } from 'config';
 import cache from 'utils/cache';
 
@@ -29,7 +25,7 @@ const MarketsContext = createContext<{
     type: string;
     expiresAt?: number;
   }) => void;
-  // positions: Position[];
+  activeMarket: Market | null;
 } | null>(null);
 
 export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -37,13 +33,14 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [activeMarketId, setActiveMarketIdState] = useState<ID | null>(
     cache(VEGA_WALLET_ACTIVE_MARKET_ID_CACHE_KEY)
   );
-  // const [positions, setPositions] = useState<Position[]>([]);
-
   const { activeKey } = useWallet();
-
   const marketsList: Market[] = useMemo(() => Array.from(marketsMap.values()), [
     marketsMap,
   ]);
+  const activeMarket = useMemo(
+    () => (!activeMarketId ? null : marketsMap.get(activeMarketId) ?? null),
+    [activeMarketId, marketsMap]
+  );
 
   const setActiveMarketId = (id: string | null) => {
     setActiveMarketIdState(id);
@@ -64,6 +61,15 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
           tradableInstrument {
             instrument {
               code
+              product {
+                ... on Future {
+                  settlementAsset {
+                   id
+                   decimals
+                   symbol
+                  }
+                }
+              }
             }
           }
         }
@@ -85,52 +91,6 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
       unsubs.forEach((unsub) => unsub());
     };
   }, [setMarkets, activeMarketId]);
-
-  // useEffect(() => {
-  //   if (!activeKey) return;
-
-  //   let isMounted = true;
-  //   const unsubs = [() => (isMounted = false)];
-
-  //   const loadPositions = async () => {
-  //     const { parties } = await api.graphql(
-  //       `
-  //     query($id: ID!) {
-  //       parties(id: $id) {
-  //         positions {
-  //           market {
-  //             name
-  //             decimalPlaces
-  //           }
-  //           openVolume
-  //           realisedPNL
-  //           unrealisedPNL
-  //           averageEntryPrice
-  //           margins {
-  //             asset {
-  //               name
-  //               symbol
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //     `,
-  //       {
-  //         id: activeKey,
-  //       }
-  //     );
-  //     if (isMounted) {
-  //       setPositions(parties[0].positions);
-  //     }
-  //   };
-
-  //   loadPositions();
-
-  //   return () => {
-  //     unsubs.forEach((unsub) => unsub());
-  //   };
-  // }, [setPositions, activeKey]);
 
   const trade = async ({
     side,
@@ -187,7 +147,7 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         activeMarketId,
         setActiveMarketId,
         trade,
-        // positions,
+        activeMarket,
       }}
     >
       {children}
@@ -206,7 +166,7 @@ export function useMarkets() {
     activeMarketId,
     setActiveMarketId,
     trade,
-    // positions,
+    activeMarket,
   } = context;
 
   return {
@@ -215,6 +175,6 @@ export function useMarkets() {
     activeMarketId,
     setActiveMarketId,
     trade,
-    // positions,
+    activeMarket,
   };
 }

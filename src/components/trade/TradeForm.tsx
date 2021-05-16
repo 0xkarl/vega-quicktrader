@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useMemo } from 'react';
 import clsx from 'clsx';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
@@ -10,11 +10,16 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
 import { useMarkets } from 'hooks/markets';
+import { useParty } from 'hooks/party';
 import { useUI } from 'hooks/ui';
+import { useWallet } from 'hooks/vega-wallet';
 
 const useStyles = makeStyles((theme) => ({
   container: {
     gridGap: '1rem',
+  },
+  depositButton: {
+    padding: 0,
   },
   footer: {
     gridGap: '1rem',
@@ -37,13 +42,30 @@ const ORDER_TYPES = ['LIMIT', 'MARKET'];
 const TradeForm: FC = () => {
   const classes = useStyles();
   const { trade } = useMarkets();
+  const { showErrorNotification } = useUI();
+  const { activeKey } = useWallet();
+  const { activeMarket } = useMarkets();
+  const { activeMarketBalance } = useParty();
+
   const [isWorking, setIsWorking] = useState<string | null>();
   const [side, setSide] = useState<string>('');
   const [orderType, setOrderType] = useState(ORDER_TYPES[0]);
   const [expiresAt, setExpiresAt] = useState(0);
-  const { showErrorNotification } = useUI();
 
   const isMarketOrder = orderType === ORDER_TYPES[1];
+
+  const formattedActiveMarketBalance = useMemo(
+    () =>
+      !activeMarket
+        ? 0
+        : activeMarketBalance /
+          Math.pow(
+            10,
+            activeMarket.tradableInstrument.instrument.product.settlementAsset
+              .decimals
+          ),
+    [activeMarketBalance, activeMarket]
+  );
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
@@ -112,7 +134,16 @@ const TradeForm: FC = () => {
         {isMarketOrder ? null : (
           <TextField
             id='price'
-            label='Price'
+            label={
+              <>
+                Price (
+                {!activeMarket
+                  ? null
+                  : activeMarket.tradableInstrument.instrument.product
+                      .settlementAsset.symbol}
+                )
+              </>
+            }
             type='number'
             inputProps={{
               step: 'any',
@@ -168,6 +199,28 @@ const TradeForm: FC = () => {
               ))}
             </Select>
           </FormControl>
+        )}
+
+        {!(activeKey && activeMarket) ? null : (
+          <Box className={'flex'}>
+            Balance: {formattedActiveMarketBalance}{' '}
+            {
+              activeMarket.tradableInstrument.instrument.product.settlementAsset
+                .symbol
+            }{' '}
+            (
+            <Button
+              color='secondary'
+              size='small'
+              disabled
+              type='button'
+              onClick={() => {}}
+              className={classes.depositButton}
+            >
+              deposit
+            </Button>
+            )
+          </Box>
         )}
 
         <Box className={clsx('grid', classes.footer)}>

@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const QUERY = `
+const ORDER_QUERY = `
   id
   price
   timeInForce
@@ -51,7 +51,7 @@ const ORDERS_QUERY = gql`
   query($partyId: ID!) {
     party(id: $partyId) {
       orders {
-        ${QUERY}
+        ${ORDER_QUERY}
       }
     }
   }
@@ -60,7 +60,7 @@ const ORDERS_QUERY = gql`
 const ORDERS_SUBSCRIPTION = gql`
   subscription($partyId: ID!) {
     orders(partyId: $partyId) {
-      ${QUERY}
+      ${ORDER_QUERY}
     }
   }
 `;
@@ -79,12 +79,17 @@ const OrdersQuery: FC<{
     client: client,
   });
 
-  const orders: Order[] = (data?.party?.orders ?? []).filter(filter);
-  orders.sort((a: Order, b: Order) => {
-    if (a.createdAt > b.createdAt) return -1;
-    if (a.createdAt < b.createdAt) return 1;
-    return 0;
-  });
+  const orders: Order[] = useMemo(() => {
+    const orders = (data?.party?.orders ?? []).filter(filter);
+
+    orders.sort((a: Order, b: Order) => {
+      if (a.createdAt > b.createdAt) return -1;
+      if (a.createdAt < b.createdAt) return 1;
+      return 0;
+    });
+
+    return orders;
+  }, [data, filter]);
 
   const subscribeToOrdersChange = () =>
     subscribeToMore({
@@ -144,7 +149,6 @@ const OrdersSubscribe: FC<{
                   <TableCell align='right'>Price</TableCell>
                   <TableCell align='right'>Created At</TableCell>
                   <TableCell align='right'>Status</TableCell>
-                  <TableCell align='right'></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -153,7 +157,7 @@ const OrdersSubscribe: FC<{
                     <TableCell component='th' scope='row'>
                       {order.market.tradableInstrument.instrument.code}
                     </TableCell>
-                    <TableCell>{order.size}</TableCell>
+                    <TableCell align='right'>{order.size}</TableCell>
                     <TableCell align='right'>{order.type}</TableCell>
                     <TableCell align='right'>{order.timeInForce}</TableCell>
                     <TableCell align='right'>
@@ -161,7 +165,6 @@ const OrdersSubscribe: FC<{
                     </TableCell>
                     <TableCell align='right'>{order.createdAt}</TableCell>
                     <TableCell align='right'>{order.status}</TableCell>
-                    <TableCell align='right'>-</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

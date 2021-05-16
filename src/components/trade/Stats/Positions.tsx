@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -6,6 +6,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Button from '@material-ui/core/Button';
 import { gql, useQuery } from '@apollo/client';
 
 import { Position } from 'vega/types';
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const QUERY = `
+const POSITION_QUERY = `
 market {
   id
   name
@@ -44,14 +45,13 @@ margins {
     name
     symbol
   }
-}
-updatedAt`;
+}`;
 
 const POSITIONS_QUERY = gql`
   query($partyId: ID!) {
     party(id: $partyId) {
       positions {
-        ${QUERY}
+        ${POSITION_QUERY}
       }
     }
   }
@@ -60,7 +60,7 @@ const POSITIONS_QUERY = gql`
 const POSITIONS_SUBSCRIPTION = gql`
   subscription($partyId: ID!) {
     positions(partyId: $partyId) {
-      ${QUERY}
+      ${POSITION_QUERY}
     }
   }
 `;
@@ -76,13 +76,17 @@ const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
     client: client,
   });
 
-  const positions: Position[] = data?.party?.positions?.slice() ?? [];
+  const positions: Position[] = useMemo(() => {
+    const positions = data?.party?.positions?.slice() ?? [];
 
-  positions.sort((a: Position, b: Position) => {
-    if (a.updatedAt > b.updatedAt) return -1;
-    if (a.updatedAt < b.updatedAt) return 1;
-    return 0;
-  });
+    positions.sort((a: Position, b: Position) => {
+      if (a.market.name > b.market.name) return 1;
+      if (a.market.name < b.market.name) return -1;
+      return 0;
+    });
+
+    return positions;
+  }, [data]);
 
   const subscribeToPositionsChange = () =>
     subscribeToMore({
@@ -103,9 +107,10 @@ const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
         } else {
           positions.push(position);
         }
-        return Object.assign({}, prev, {
-          party: { positions },
-        });
+        // return Object.assign({}, prev, {
+        //   party: { positions },
+        // });
+        return { party: { positions } };
       },
     });
 
@@ -157,7 +162,7 @@ const PositionsSubscribe: FC<{
                       {position.market.tradableInstrument.instrument.code}
                     </TableCell>
                     <TableCell>-</TableCell>
-                    <TableCell>{position.openVolume}</TableCell>
+                    <TableCell align='right'>{position.openVolume}</TableCell>
                     <TableCell align='right'>
                       {position.averageEntryPrice /
                         Math.pow(10, position.market.decimalPlaces)}
@@ -172,7 +177,17 @@ const PositionsSubscribe: FC<{
                       {position.realisedPNL /
                         Math.pow(10, position.market.decimalPlaces)}
                     </TableCell>
-                    <TableCell align='right'>-</TableCell>
+                    <TableCell align='right'>
+                      <Button
+                        color='secondary'
+                        variant='contained'
+                        disabled
+                        size='small'
+                        onClick={() => {}}
+                      >
+                        close
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

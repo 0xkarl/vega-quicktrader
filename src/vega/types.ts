@@ -4,9 +4,20 @@ export interface Key {
 
 export type ID = string;
 
+export interface Asset {
+  id: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+}
+
+export interface Product {
+  settlementAsset: Asset;
+}
 export interface Instrument {
   name: string;
   code: string;
+  product: Product;
 }
 
 export interface TradableInstrument {
@@ -18,11 +29,6 @@ export interface Market {
   name: string;
   decimalPlaces: number;
   tradableInstrument: TradableInstrument;
-}
-
-export interface Asset {
-  name: string;
-  symbol: string;
 }
 
 export interface Margin {
@@ -59,4 +65,11 @@ export interface Trade {
   price: number;
   size: number;
   createdAt: string;
+}
+
+export interface Account {
+  balance: string;
+  asset: Asset;
+  type: string;
+  market: Market;
 }

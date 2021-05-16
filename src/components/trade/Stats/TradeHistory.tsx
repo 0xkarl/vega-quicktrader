@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const QUERY = `
+const TRADE_QUERY = `
   id
   price
   market {
@@ -45,7 +45,7 @@ const TRADES_QUERY = gql`
   query($partyId: ID!) {
     party(id: $partyId) {
       trades {
-        ${QUERY}
+        ${TRADE_QUERY}
       }
     }
   }
@@ -54,7 +54,7 @@ const TRADES_QUERY = gql`
 const TRADES_SUBSCRIPTION = gql`
   subscription($partyId: ID!) {
     trades(partyId: $partyId) {
-      ${QUERY}
+      ${TRADE_QUERY}
     }
   }
 `;
@@ -72,12 +72,17 @@ const TradesQuery: FC<{
     client: client,
   });
 
-  const trades: Trade[] = data?.party?.trades ?? [];
-  trades.sort((a: Trade, b: Trade) => {
-    if (a.createdAt > b.createdAt) return -1;
-    if (a.createdAt < b.createdAt) return 1;
-    return 0;
-  });
+  const trades: Trade[] = useMemo(() => {
+    const trades = data?.party?.trades.slice() ?? [];
+
+    trades.sort((a: Trade, b: Trade) => {
+      if (a.createdAt > b.createdAt) return -1;
+      if (a.createdAt < b.createdAt) return 1;
+      return 0;
+    });
+
+    return trades;
+  }, [data]);
 
   const subscribeToTradesChange = () =>
     subscribeToMore({
@@ -140,7 +145,7 @@ const TradesSubscribe: FC<{
                     <TableCell component='th' scope='row'>
                       {trade.market.tradableInstrument.instrument.code}
                     </TableCell>
-                    <TableCell>{trade.size}</TableCell>
+                    <TableCell align='right'>{trade.size}</TableCell>
                     <TableCell align='right'>
                       {trade.price / Math.pow(10, trade.market.decimalPlaces)}
                     </TableCell>
