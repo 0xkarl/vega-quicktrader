@@ -122,7 +122,7 @@ const TradeForm: FC = () => {
           label='Size'
           type='number'
           inputProps={{
-            step: 'any',
+            step: '1',
           }}
           InputLabelProps={{
             shrink: true,
