@@ -61,7 +61,16 @@ export const PartyProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { activeKey } = useWallet();
 
   return !activeKey ? (
-    <>{children}</>
+    <PartyContext.Provider
+      value={{
+        accounts: [],
+        isLoadingAccounts: false,
+        activeMarketAccounts: [],
+        activeMarketBalance: 0,
+      }}
+    >
+      {children}
+    </PartyContext.Provider>
   ) : (
     <Load {...{ activeKey }}>{children}</Load>
   );
