@@ -1,9 +1,11 @@
 import { FC } from 'react';
-import { Order } from 'vega/types';
+import { useParty } from 'hooks/party';
+
 import Orders from './_Orders';
 
 const OpenOrders: FC = () => {
-  return <Orders filter={(order: Order) => true} />;
+  const { closedOrders, isLoadingOrders } = useParty();
+  return <Orders orders={closedOrders} {...{ isLoadingOrders }} />;
 };
 
 export default OpenOrders;

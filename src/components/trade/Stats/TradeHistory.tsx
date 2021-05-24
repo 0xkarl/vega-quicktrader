@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from 'react';
+import { FC } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -6,12 +6,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { gql, useQuery } from '@apollo/client';
 
-import { Trade } from 'vega/types';
-import { client } from 'vega/ws';
-
-import { useWallet } from 'hooks/vega-wallet';
+import { useParty } from 'hooks/party';
 import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({
@@ -24,106 +20,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TRADE_QUERY = `
-  id
-  price
-  market {
-    id
-    name
-    decimalPlaces
-    tradableInstrument {
-      instrument {
-        code
-      }
-    }
-  }
-  size
-  createdAt
-`;
-
-const TRADES_QUERY = gql`
-  query($partyId: ID!) {
-    party(id: $partyId) {
-      trades {
-        ${TRADE_QUERY}
-      }
-    }
-  }
-`;
-
-const TRADES_SUBSCRIPTION = gql`
-  subscription($partyId: ID!) {
-    trades(partyId: $partyId) {
-      ${TRADE_QUERY}
-    }
-  }
-`;
-
 const Trades: FC = () => {
-  const { activeKey } = useWallet();
-  return !activeKey ? null : <TradesQuery {...{ activeKey }} />;
-};
-
-const TradesQuery: FC<{
-  activeKey: string;
-}> = ({ activeKey }) => {
-  const { subscribeToMore, data, loading } = useQuery(TRADES_QUERY, {
-    variables: { partyId: activeKey },
-    client: client,
-  });
-
-  const trades: Trade[] = useMemo(() => {
-    const trades = data?.party?.trades.slice() ?? [];
-
-    trades.sort((a: Trade, b: Trade) => {
-      if (a.createdAt > b.createdAt) return -1;
-      if (a.createdAt < b.createdAt) return 1;
-      return 0;
-    });
-
-    return trades;
-  }, [data]);
-
-  const subscribeToTradesChange = () =>
-    subscribeToMore({
-      document: TRADES_SUBSCRIPTION,
-      variables: { partyId: activeKey },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const trades: Trade[] = prev?.party?.trades?.slice() ?? [];
-
-        const trade: Trade =
-          subscriptionData.data.trades[0] ?? subscriptionData.data.trades;
-        const idx = trades.findIndex((p: Trade) => p.id === trade.id);
-        if (~idx) {
-          trades[idx] = trade;
-        } else {
-          trades.push(trade);
-        }
-
-        return Object.assign({}, prev, {
-          party: { trades },
-        });
-      },
-    });
-
-  return <TradesSubscribe {...{ trades, subscribeToTradesChange, loading }} />;
-};
-
-const TradesSubscribe: FC<{
-  subscribeToTradesChange: () => void;
-  trades: Trade[];
-  loading: boolean;
-}> = ({ subscribeToTradesChange, trades, loading }) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    subscribeToTradesChange();
-  }, [subscribeToTradesChange]);
+  const { trades, isLoadingTrades } = useParty();
 
   return (
     <Box p={2}>
-      {loading ? (
+      {isLoadingTrades ? (
         <Box>Loading...</Box>
       ) : !trades.length ? (
         <Box>No trades found.</Box>

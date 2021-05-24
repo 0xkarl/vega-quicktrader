@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from 'react';
+import { FC } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -7,12 +7,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
-import { gql, useQuery } from '@apollo/client';
 
-import { Position } from 'vega/types';
-import { client } from 'vega/ws';
-
-import { useWallet } from 'hooks/vega-wallet';
+import { useParty } from 'hooks/party';
 import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({
@@ -25,116 +21,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const POSITION_QUERY = `
-market {
-  id
-  name
-  decimalPlaces
-  tradableInstrument {
-    instrument {
-      code
-    }
-  }
-}
-openVolume
-realisedPNL
-unrealisedPNL
-averageEntryPrice
-margins {
-  asset {
-    name
-    symbol
-  }
-}`;
-
-const POSITIONS_QUERY = gql`
-  query($partyId: ID!) {
-    party(id: $partyId) {
-      positions {
-        ${POSITION_QUERY}
-      }
-    }
-  }
-`;
-
-const POSITIONS_SUBSCRIPTION = gql`
-  subscription($partyId: ID!) {
-    positions(partyId: $partyId) {
-      ${POSITION_QUERY}
-    }
-  }
-`;
-
 const Positions: FC = () => {
-  const { activeKey } = useWallet();
-  return !activeKey ? null : <PositionsQuery {...{ activeKey }} />;
-};
-
-const PositionsQuery: FC<{ activeKey: string }> = ({ activeKey }) => {
-  const { subscribeToMore, data, loading } = useQuery(POSITIONS_QUERY, {
-    variables: { partyId: activeKey },
-    client: client,
-  });
-
-  const positions: Position[] = useMemo(() => {
-    const positions = data?.party?.positions?.slice() ?? [];
-
-    positions.sort((a: Position, b: Position) => {
-      if (a.market.name > b.market.name) return 1;
-      if (a.market.name < b.market.name) return -1;
-      return 0;
-    });
-
-    return positions;
-  }, [data]);
-
-  const subscribeToPositionsChange = () =>
-    subscribeToMore({
-      document: POSITIONS_SUBSCRIPTION,
-      variables: { partyId: activeKey },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const positions: Position[] = prev?.party?.positions?.slice() ?? [];
-
-        const position: Position =
-          subscriptionData.data.positions[0] ?? subscriptionData.data.positions;
-
-        const idx = positions.findIndex(
-          (p: Position) => p.market.id === position.market.id
-        );
-        if (~idx) {
-          positions[idx] = position;
-        } else {
-          positions.push(position);
-        }
-        // return Object.assign({}, prev, {
-        //   party: { positions },
-        // });
-        return { party: { positions } };
-      },
-    });
-
-  return (
-    <PositionsSubscribe
-      {...{ positions, subscribeToPositionsChange, loading }}
-    />
-  );
-};
-
-const PositionsSubscribe: FC<{
-  subscribeToPositionsChange: () => void;
-  positions: Position[];
-  loading: boolean;
-}> = ({ subscribeToPositionsChange, positions, loading }) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    subscribeToPositionsChange();
-  }, [subscribeToPositionsChange]);
+  const { positions, isLoadingPositions } = useParty();
 
   return (
     <Box p={2}>
-      {loading ? (
+      {isLoadingPositions ? (
         <Box>Loading...</Box>
       ) : !positions.length ? (
         <Box>No positions found.</Box>

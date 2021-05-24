@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from 'react';
+import { FC } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
@@ -6,12 +6,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { gql, useQuery } from '@apollo/client';
 
 import { Order } from 'vega/types';
-import { client } from 'vega/ws';
-
-import { useWallet } from 'hooks/vega-wallet';
 import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({
@@ -24,115 +20,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ORDER_QUERY = `
-  id
-  price
-  timeInForce
-  side
-  market {
-    id
-    name
-    decimalPlaces
-    tradableInstrument {
-      instrument {
-        code
-      }
-    }
-  }
-  size
-  remaining
-  createdAt
-  expiresAt
-  status
-  type
-`;
-
-const ORDERS_QUERY = gql`
-  query($partyId: ID!) {
-    party(id: $partyId) {
-      orders {
-        ${ORDER_QUERY}
-      }
-    }
-  }
-`;
-
-const ORDERS_SUBSCRIPTION = gql`
-  subscription($partyId: ID!) {
-    orders(partyId: $partyId) {
-      ${ORDER_QUERY}
-    }
-  }
-`;
-
-const Orders: FC<{ filter: (order: Order) => boolean }> = ({ filter }) => {
-  const { activeKey } = useWallet();
-  return !activeKey ? null : <OrdersQuery {...{ activeKey, filter }} />;
-};
-
-const OrdersQuery: FC<{
-  activeKey: string;
-  filter: (order: Order) => boolean;
-}> = ({ activeKey, filter }) => {
-  const { subscribeToMore, data, loading } = useQuery(ORDERS_QUERY, {
-    variables: { partyId: activeKey },
-    client: client,
-  });
-
-  const orders: Order[] = useMemo(() => {
-    const orders = (data?.party?.orders ?? []).filter(filter);
-
-    orders.sort((a: Order, b: Order) => {
-      if (a.createdAt > b.createdAt) return -1;
-      if (a.createdAt < b.createdAt) return 1;
-      return 0;
-    });
-
-    return orders;
-  }, [data, filter]);
-
-  const subscribeToOrdersChange = () =>
-    subscribeToMore({
-      document: ORDERS_SUBSCRIPTION,
-      variables: { partyId: activeKey },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const orders: Order[] = (prev?.party?.orders?.slice() ?? []).filter(
-          filter
-        );
-
-        const order: Order =
-          subscriptionData.data.orders[0] ?? subscriptionData.data.orders;
-        const idx = orders.findIndex((p: Order) => p.id === order.id);
-        if (~idx) {
-          orders[idx] = order;
-        } else {
-          orders.push(order);
-        }
-
-        return Object.assign({}, prev, {
-          party: { orders },
-        });
-      },
-    });
-
-  return <OrdersSubscribe {...{ orders, subscribeToOrdersChange, loading }} />;
-};
-
-const OrdersSubscribe: FC<{
-  subscribeToOrdersChange: () => void;
-  orders: Order[];
-  loading: boolean;
-}> = ({ subscribeToOrdersChange, orders, loading }) => {
+const Orders: FC<{ isLoadingOrders: boolean; orders: Order[] }> = ({
+  isLoadingOrders,
+  orders,
+}) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    subscribeToOrdersChange();
-  }, [subscribeToOrdersChange]);
 
   return (
     <Box p={2}>
-      {loading ? (
+      {isLoadingOrders ? (
         <Box>Loading...</Box>
       ) : !orders.length ? (
         <Box>No orders found.</Box>
