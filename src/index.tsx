@@ -5,10 +5,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import { WalletProvider } from 'hooks/vega-wallet';
-import { MarketsProvider } from 'hooks/markets';
-import { UIProvider } from 'hooks/ui';
-import { PartyProvider } from 'hooks/party';
+import { WalletProvider } from 'contexts/vega-wallet';
+import { MarketsProvider } from 'contexts/markets';
+import { UIProvider } from 'contexts/ui';
+import { PartyProvider } from 'contexts/party';
 
 import Trade from 'pages/Trade';
 import Wallet from 'pages/Wallet';

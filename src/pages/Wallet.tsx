@@ -9,8 +9,8 @@ import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 
-import { useWallet } from 'hooks/vega-wallet';
-import { useParty } from 'hooks/party';
+import { useWallet } from 'contexts/vega-wallet';
+import { useParty } from 'contexts/party';
 import { Asset } from 'vega/types';
 import { LG, SM } from 'components/shared/Screen';
 

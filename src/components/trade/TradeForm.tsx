@@ -9,10 +9,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
-import { useMarkets } from 'hooks/markets';
-import { useParty } from 'hooks/party';
-import { useUI } from 'hooks/ui';
-import { useWallet } from 'hooks/vega-wallet';
+import { useMarkets } from 'contexts/markets';
+import { useParty } from 'contexts/party';
+import { useUI } from 'contexts/ui';
+import { useWallet } from 'contexts/vega-wallet';
 
 const useStyles = makeStyles((theme) => ({
   container: {

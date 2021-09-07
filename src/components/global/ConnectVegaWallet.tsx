@@ -10,7 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 
-import { useWallet } from 'hooks/vega-wallet';
+import { useWallet } from 'contexts/vega-wallet';
 
 const useStyles = makeStyles(() => ({
   container: {

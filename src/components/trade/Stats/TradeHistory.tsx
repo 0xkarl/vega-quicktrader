@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-import { useParty } from 'hooks/party';
+import { useParty } from 'contexts/party';
 import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({

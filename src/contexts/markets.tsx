@@ -128,7 +128,7 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     console.log({ submitId });
     const { signedTx } = await api.wallet({
       method: 'POST',
-      endpoint: '/messages/sync',
+      endpoint: '/messages',
       data: {
         tx: blob,
         pubKey: activeKey,

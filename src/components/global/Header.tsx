@@ -11,7 +11,7 @@ import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 
 import { APP_NAME } from 'config';
-import { useWallet as useVegaWallet } from 'hooks/vega-wallet';
+import { useWallet as useVegaWallet } from 'contexts/vega-wallet';
 import { LG, SM } from 'components/shared/Screen';
 
 const useStyles = makeStyles((theme) => ({

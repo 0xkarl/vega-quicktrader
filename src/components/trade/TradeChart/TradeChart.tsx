@@ -8,7 +8,7 @@ import { Chart, ChartElement, ChartType, Overlay, Study } from 'pennant';
 import { ApolloDataSource } from './data-source/vega-protocol-data-source';
 import { Interval } from './api/vega-graphql';
 
-import { useMarkets } from 'hooks/markets';
+import { useMarkets } from 'contexts/markets';
 import { client } from 'vega/ws';
 
 const useStyles = makeStyles(() => ({

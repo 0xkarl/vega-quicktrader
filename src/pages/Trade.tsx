@@ -9,7 +9,7 @@ import TradeForm from 'components/trade/TradeForm';
 import TradeChart from 'components/trade/TradeChart';
 import Stats from 'components/trade/Stats/Stats';
 import { LG, SM } from 'components/shared/Screen';
-import { useUI } from 'hooks/ui';
+import { useUI } from 'contexts/ui';
 
 const MARGIN = 2;
 

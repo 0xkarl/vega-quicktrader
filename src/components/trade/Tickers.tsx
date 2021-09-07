@@ -7,8 +7,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ChartIcon from '@material-ui/icons/InsertChart';
 import TradeIcon from '@material-ui/icons/ViewAgenda';
 
-import { useMarkets } from 'hooks/markets';
-import { useUI } from 'hooks/ui';
+import { useMarkets } from 'contexts/markets';
+import { useUI } from 'contexts/ui';
 
 import { LG, SM } from 'components/shared/Screen';
 

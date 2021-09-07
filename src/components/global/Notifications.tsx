@@ -2,7 +2,7 @@ import { FC } from 'react';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { useUI } from 'hooks/ui';
+import { useUI } from 'contexts/ui';
 
 const Notifications: FC = () => {
   const { notification, notify } = useUI();

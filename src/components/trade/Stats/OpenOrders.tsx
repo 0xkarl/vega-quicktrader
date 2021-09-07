@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useParty } from 'hooks/party';
+import { useParty } from 'contexts/party';
 
 import Orders from './_Orders';
 
