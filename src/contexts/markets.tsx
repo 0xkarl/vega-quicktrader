@@ -107,32 +107,29 @@ export const MarketsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }) => {
     const market = marketsMap.get(activeMarketId!)!;
     if (expiresAt) {
-      const { timestamp: blockchainTime } = await api.rest('/time');
+      const { timestamp: blockchainTime } = await api.node('/time');
       expiresAt = parseInt(blockchainTime) + expiresAt * 10 ** 9;
     }
-    const { blob, submitId } = await api.rest('/orders/prepare/submit', {
-      submission: {
-        marketId: activeMarketId,
-        partyId: activeKey,
-        ...(price ? { price: price * Math.pow(10, market.decimalPlaces) } : {}),
-        size,
-        side: `SIDE_${side}`,
-        ...(type === 'MARKET'
-          ? { timeInForce: 'TIME_IN_FORCE_IOC' }
-          : expiresAt
-          ? { timeInForce: 'TIME_IN_FORCE_GTT', expiresAt }
-          : { timeInForce: 'TIME_IN_FORCE_GTC' }),
-        type: `TYPE_${type}`,
-      },
-    });
-    console.log({ submitId });
     const { signedTx } = await api.wallet({
       method: 'POST',
-      endpoint: '/messages',
+      endpoint: '/command',
       data: {
-        tx: blob,
         pubKey: activeKey,
         propagate: true,
+        orderSubmission: {
+          marketId: activeMarketId,
+          ...(price
+            ? { price: price * Math.pow(10, market.decimalPlaces) }
+            : {}),
+          size,
+          side: `SIDE_${side}`,
+          ...(type === 'MARKET'
+            ? { timeInForce: 'TIME_IN_FORCE_IOC' }
+            : expiresAt
+            ? { timeInForce: 'TIME_IN_FORCE_GTT', expiresAt }
+            : { timeInForce: 'TIME_IN_FORCE_GTC' }),
+          type: `TYPE_${type}`,
+        },
       },
       auth: true,
     });

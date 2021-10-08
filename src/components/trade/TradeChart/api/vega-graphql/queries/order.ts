@@ -76,39 +76,3 @@ export const orderSubscription = gql`
     }
   }
 `;
-
-export const prepareCancelOrderQuery = gql`
-  mutation prepareOrderCancel($id: ID!, $marketId: ID!, $partyId: ID!) {
-    prepareOrderCancel(id: $id, partyId: $partyId, marketId: $marketId) {
-      blob
-    }
-  }
-`;
-
-export const prepareOrderSubmitQuery = gql`
-  mutation prepareOrderSubmit(
-    $marketId: ID!
-    $partyId: ID!
-    $price: String
-    $size: String!
-    $side: Side!
-    $timeInForce: OrderTimeInForce!
-    $expiration: String
-    $type: OrderType!
-    $reference: String!
-  ) {
-    prepareOrderSubmit(
-      marketId: $marketId
-      partyId: $partyId
-      price: $price
-      size: $size
-      side: $side
-      timeInForce: $timeInForce
-      type: $type
-      expiration: $expiration
-      reference: $reference
-    ) {
-      blob
-    }
-  }
-`;
